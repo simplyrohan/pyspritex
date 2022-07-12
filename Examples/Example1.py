@@ -1,16 +1,10 @@
 from pyspritex import *
 
-game = Game(background_color="blue", physics=True, resizable=True)
+game = Game(background_color="blue", resizable=True)
 
 shape = GameObject(game, background_color="red")
 
 game.add_game_object(shape)
 
-
-def on_update():
-    shape.x += 1
-
-
-game.on_update = on_update
-
-game.run()
+if __name__ == "__main__":
+    game.run()
