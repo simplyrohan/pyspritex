@@ -1,5 +1,8 @@
 from setuptools import setup
 
+with open("README.md", "r") as readme:
+    README = readme.read()
+
 setup(
     name='pyspritex',
     version='0.0.1',
@@ -8,5 +11,6 @@ setup(
     license='MIT License',
     author='Rohan Gupta',
     author_email='',
-    description='About A package to make desktop applications easy to develop in python'
+    description='A package to make desktop applications easy to develop in python',
+    long_description=str(README)
 )
