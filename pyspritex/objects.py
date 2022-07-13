@@ -25,16 +25,22 @@ class PhysicsGroup:
                 else:
                     game_obj.y += self.gravity
 
-    def check_pos(self, game_obj, xy):
-        x = False
-        y = False
-        if xy[0]+game_obj.width <= self.screen_size[0] and xy[0] >= 0:
-            x = True
+    def check_pos(self, game_obj, x, y):
+        success = True
 
-        if xy[1]+game_obj.height <= self.screen_size[1] and xy[1] >= 0:
-            y = True
+        if x+game_obj.width > self.screen_size[0] and x < 0:
+            x = False
 
-        return x and y
+        if y+game_obj.height > self.screen_size[1] and y < 0:
+            y = False
+
+        self.objects = [GameObject(Game())]
+
+        for game_object in self.objects:
+            if game_obj.rect.move(x, y).colliderect(game_object):
+                success = False
+
+        return not success
 
 
 class Game:
@@ -76,17 +82,26 @@ class Game:
         self.on_update = None
 
     def add_game_object(self, game_object):
-        self.game_objects.append(game_object)
-        if game_object.physics_group is None:
+        try:
+            self.game_objects.index(game_object)
+        except ValueError:
+            self.game_objects.append(game_object)
+            game_object.game = self
+            if game_object.physics_group is None:
 
-            game_object.physics_group = self.default_physics_group
-        else:
-            self.physics_groups.append(game_object.physics_group)
+                game_object.physics_group = self.default_physics_group
+            else:
+                self.physics_groups.append(game_object.physics_group)
+
 
     def update(self):
         self.window_width, self.window_height = pygame.display.get_window_size()
 
-        self.on_update()
+        try:
+            self.on_update()
+        except TypeError:
+            pass
+
         self.surface.fill(self.background_color)
         for game_object in self.game_objects:
             self.surface.blit(game_object.surface, game_object.pos)
@@ -113,11 +128,9 @@ class Game:
 
 
 class GameObject:
-    def __init__(self, game: Game, height: Union[int, float] = 50, width: Union[int, float] = 50,
+    def __init__(self, height: Union[int, float] = 50, width: Union[int, float] = 50,
                  xy: Union[list, tuple] = (0, 0), background_color: Union[str, tuple] = "gray",
                  physics_group: PhysicsGroup = None):
-
-        self.game = game
 
         self.height, self.width = height, width
         assert len(xy) == 2
@@ -141,17 +154,22 @@ class GameObject:
         if self._physics_group is not None:
             self._physics_group.add_game_object(self)
 
+        self.game = None
+
     @property
     def x(self):
         return self._x
 
     @x.setter
     def x(self, value: int):
-        if self.physics_group.check_pos(self, (value, self.y)):
-            self._x = value
-            self.pos = self._x, self._y
-        else:
-            self.x = self.physics_group.screen_size[0]-self.width
+        if self.physics_group is not None:
+            if self.physics_group.check_pos(self, (value, self.y)):
+                self._x = value
+                self.pos = self._x, self._y
+            else:
+                self.x = self.physics_group.screen_size[0]-self.width
+
+
 
     @property
     def y(self):
