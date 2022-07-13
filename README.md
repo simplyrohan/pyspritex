@@ -7,8 +7,14 @@ pyspritex is a package to make desktop app production in Python more streamlined
 
 ## Installation
 
+For the latest version:
 ```bash
 git clone https://github.com/simplyrohan/pyspritex.git
+```
+
+For the stable release
+```
+pip install pypritex
 ```
 
 ## Basic Usage
